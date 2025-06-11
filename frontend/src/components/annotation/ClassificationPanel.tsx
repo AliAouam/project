@@ -86,7 +86,7 @@ const ClassificationPanel: React.FC<Props> = ({
     };
 
     try {
-      const response = await fetch("http://localhost:8000/classifications", {
+      const response = await fetch(`${API}/api/classifications`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
