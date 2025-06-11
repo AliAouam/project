@@ -18,14 +18,14 @@ const AnnotationDetails: React.FC<AnnotationDetailsProps> = ({
 }) => {
   const { updateAnnotation, deleteAnnotation } = useImageStore();
   const [type, setType] = useState(annotation?.type || '');
-  const [severity, setSeverity] = useState<'mild' | 'moderate' | 'severe'>(
-    (annotation?.severity as 'mild' | 'moderate' | 'severe') || 'mild'
+  const [stage, setStage] = useState<'mild' | 'moderate' | 'severe'>(
+    (annotation?.stage as 'mild' | 'moderate' | 'severe') || 'mild'
   );
 
   React.useEffect(() => {
     if (annotation) {
       setType(annotation.type);
-      setSeverity(annotation.severity);
+      setStage(annotation.stage);
     }
   }, [annotation]);
 
@@ -42,14 +42,14 @@ const AnnotationDetails: React.FC<AnnotationDetailsProps> = ({
     updateAnnotation(annotation.id, { type: e.target.value });
   };
 
-  const handleSeverityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSeverity = e.target.value as 'mild' | 'moderate' | 'severe';
-    setSeverity(newSeverity);
-    
-    // Update color based on severity
-    const color = getSeverityColor(newSeverity);
-    updateAnnotation(annotation.id, { 
-      severity: newSeverity,
+  const handleStageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStage = e.target.value as 'mild' | 'moderate' | 'severe';
+    setStage(newStage);
+
+    // Update color based on stage
+    const color = getStageColor(newStage);
+    updateAnnotation(annotation.id, {
+      stage: newStage,
       color
     });
   };
@@ -58,8 +58,8 @@ const AnnotationDetails: React.FC<AnnotationDetailsProps> = ({
     deleteAnnotation(annotation.id);
   };
 
-  const getSeverityColor = (severity: string): string => {
-    switch (severity) {
+  const getStageColor = (stageValue: string): string => {
+    switch (stageValue) {
       case 'mild':
         return '#FFC107'; // Yellow
       case 'moderate':
@@ -105,9 +105,9 @@ const AnnotationDetails: React.FC<AnnotationDetailsProps> = ({
           />
           
           <Select
-            label="Severity"
-            value={severity}
-            onChange={handleSeverityChange}
+            label="Stage"
+            value={stage}
+            onChange={handleStageChange}
             options={[
               { value: 'mild', label: 'Mild' },
               { value: 'moderate', label: 'Moderate' },
@@ -135,7 +135,7 @@ const AnnotationDetails: React.FC<AnnotationDetailsProps> = ({
               Type: {matchingAIAnnotation.type}
             </p>
             <p className="text-sm text-green-700">
-              Severity: {matchingAIAnnotation.severity}
+              Stage: {matchingAIAnnotation.stage}
             </p>
             <p className="text-sm text-green-700">
               Confidence: {(matchingAIAnnotation.confidence * 100).toFixed(1)}%

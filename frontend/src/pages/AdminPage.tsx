@@ -298,6 +298,7 @@ const AdminPage: React.FC = () => {
               <tr className="border-b">
                 <th className="py-2 text-left">Patient Name</th>
                 <th className="py-2 text-left">Patient ID</th>
+                <th className="py-2 text-left">Doctor</th>
                 <th className="py-2 text-left">Upload Date</th>
                 <th className="py-2 text-left">Actions</th>
               </tr>
@@ -307,6 +308,7 @@ const AdminPage: React.FC = () => {
                 <tr key={img.id} className="border-b hover:bg-gray-50">
                   <td className="py-1">{img.patientName || img.id}</td>
                   <td className="py-1">{img.patientId || '-'}</td>
+                  <td className="py-1">{img.uploadedBy || '-'}</td>
                   <td className="py-1">{new Date(img.uploadedAt).toLocaleDateString()}</td>
                   <td className="py-1">
                     <button className="text-red-600 hover:underline" onClick={() => handleDeleteImage(img.id)}>

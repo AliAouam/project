@@ -33,7 +33,7 @@ const AnnotationCanvas: React.FC<Props> = ({
   const [drawing, setDrawing] = useState(false)
   const [tmp, setTmp] = useState<{ x: number; y: number; w: number; h: number } | null>(null)
   const [type, setType] = useState('hemorrhage')
-  const [severity, setSeverity] = useState<'mild'|'moderate'|'severe'>('mild')
+  const [stage, setStage] = useState<'mild'|'moderate'|'severe'>('mild')
   const stageRef = useRef<any>(null)
 
   useEffect(() => {
@@ -80,8 +80,8 @@ const AnnotationCanvas: React.FC<Props> = ({
       width: nw,
       height: nh,
       type,
-      severity,
-      color: colorFor(severity),
+      stage,
+      color: colorFor(stage),
       createdAt: new Date().toISOString(),
       created_by: user.email // << utiliser l'utilisateur connecté !
     }
@@ -107,7 +107,7 @@ const AnnotationCanvas: React.FC<Props> = ({
               {value:'neovascularization',label:'Neovascularization'},
             ]}
           />
-          <Select label="Severity" value={severity} onChange={e=>setSeverity(e.target.value as any)} className="w-40"
+          <Select label="Stage" value={stage} onChange={e=>setStage(e.target.value as any)} className="w-40"
             options={[
               {value:'mild',label:'Mild'},
               {value:'moderate',label:'Moderate'},
@@ -163,7 +163,7 @@ const AnnotationCanvas: React.FC<Props> = ({
               <Rect
                 x={tmp.x} y={tmp.y}
                 width={tmp.w} height={tmp.h}
-                stroke={colorFor(severity)}
+                stroke={colorFor(stage)}
                 strokeWidth={2}
                 dash={[5,2]}
               />
