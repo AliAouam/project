@@ -46,7 +46,7 @@ const AnnotationList: React.FC<AnnotationListProps> = ({
               />
               <div>
                 <p className="text-sm font-medium text-gray-900">{annotation.type}</p>
-                <p className="text-xs text-gray-500">Severity: {annotation.severity}</p>
+                <p className="text-xs text-gray-500">Stade: {annotation.stage}</p>
               </div>
             </div>
           </li>
