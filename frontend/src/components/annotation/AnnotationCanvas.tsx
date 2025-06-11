@@ -16,6 +16,8 @@ interface Props {
   onAnnotationSelect: (id: string) => void
   onAnnotationsChange: (newAnnots: Annotation[]) => void
   user: User  // <-- add user prop
+  onExportJSON: () => void
+  exportDisabled: boolean
 }
 
 const AnnotationCanvas: React.FC<Props> = ({
@@ -25,7 +27,9 @@ const AnnotationCanvas: React.FC<Props> = ({
   showAI,
   onAnnotationSelect,
   onAnnotationsChange,
-  user
+  user,
+  onExportJSON,
+  exportDisabled
 }) => {
   const [img, setImg] = useState<HTMLImageElement | null>(null)
   const [baseScale, setBaseScale] = useState(1)
@@ -115,6 +119,7 @@ const AnnotationCanvas: React.FC<Props> = ({
             ]}
           />
         </div>
+        <Button size="sm" onClick={onExportJSON} disabled={exportDisabled} className="ml-auto">Export JSON</Button>
       </div>
       <div className="border rounded-lg overflow-hidden bg-gray-100">
         <Stage

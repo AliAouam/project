@@ -86,6 +86,7 @@ class ImageOut(BaseModel):
     filename: str
     url: str
     uploadedAt: datetime
+    uploadedBy: Optional[str] = None
 
 class AnnotationIn(BaseModel):
     imageId: str
@@ -111,6 +112,8 @@ class ClassificationIn(BaseModel):
     patientName: str
     imagePath: str
     manual_label: str
+    stage: Optional[int] = None
+    other_disease: Optional[str] = None
     ai_prediction: Optional[AIPrediction] = None
     annotations: List[dict]
     comparison: str
@@ -230,7 +233,8 @@ async def delete_user(user_id: str):
 async def upload_image(
     patientId: str = Form(...),
     patientName: str = Form(...),
-    image: UploadFile = File(...)
+    image: UploadFile = File(...),
+    uploadedBy: Optional[str] = Form(None)
 ):
     if not image.content_type.startswith("image/"):
         raise HTTPException(400, "File must be an image")
@@ -243,15 +247,19 @@ async def upload_image(
         "patientName": patientName,
         "filename": image.filename,
         "url": public_url,
-        "uploadedAt": datetime.utcnow()
+        "uploadedAt": datetime.utcnow(),
+        "uploadedBy": uploadedBy,
     }
     res = await db.images.insert_one(doc)
     await add_log("upload", "image", str(res.inserted_id))
     return ImageOut(id=str(res.inserted_id), **doc)
 
 @app.get("/api/images", response_model=List[ImageOut])
-async def list_images():
-    docs = await db.images.find().to_list(100)
+async def list_images(uploaded_by: Optional[str] = Query(None)):
+    query = {}
+    if uploaded_by:
+        query["uploadedBy"] = uploaded_by
+    docs = await db.images.find(query).to_list(100)
     return [ImageOut(id=str(d["_id"]), **d) for d in docs]
 
 @app.delete("/api/images/{image_id}", status_code=status.HTTP_200_OK)
@@ -308,7 +316,7 @@ async def predict(file: UploadFile = File(...)):
     result = predict_image(data)
     return AIPrediction(**result)
 
-@app.post("/api/classifications", response_model=ClassificationIn)
+@app.post("/api/classifications", response_model=ClassificationOut)
 async def save_classification(classif: ClassificationIn):
     d = classif.dict()
     d["created_at"] = datetime.utcnow()

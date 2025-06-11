@@ -32,6 +32,9 @@ const AnnotationPage: React.FC = () => {
   const [loadingAnn, setLoadingAnn] = useState(false)
   const [loadingAI, setLoadingAI] = useState(false)
   const [aiResult, setAIResult] = useState<AIPrediction | null>(null)
+  const [manualLabel, setManualLabel] = useState('')
+  const [stage, setStage] = useState('')
+  const [otherDisease, setOtherDisease] = useState('')
 
   // 1) Auth & load image
   useEffect(() => {
@@ -132,6 +135,34 @@ const AnnotationPage: React.FC = () => {
     }
   }
 
+  // 8) Export JSON (classification)
+  const handleExportJSON = () => {
+    if (!currentImage) return
+    const exportData = {
+      patientId: currentImage.patientId,
+      patientName: currentImage.patientName,
+      imagePath: currentImage.url,
+      manual_label: manualLabel,
+      stage: manualLabel === 'No DR' ? null : stage,
+      other_disease: manualLabel === 'No DR' ? otherDisease : null,
+      ai_prediction: aiResult,
+      annotations,
+      comparison: aiResult
+        ? aiResult.label === manualLabel
+          ? 'Identique'
+          : 'Différent'
+        : 'En attente',
+      exported_at: new Date().toISOString(),
+    }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${currentImage.patientId}_annotations_export.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   // 8) Export PDF
   const handleExportPDF = async () => {
     if (!currentImage) return
@@ -191,6 +222,8 @@ const AnnotationPage: React.FC = () => {
             onAnnotationSelect={setSelectedId}
             onAnnotationsChange={handleDrawChange}
             user={user!}
+            onExportJSON={handleExportJSON}
+            exportDisabled={!manualLabel || (manualLabel !== 'No DR' && stage === '')}
           />
         </div>
         <div className="space-y-4">
@@ -225,6 +258,12 @@ const AnnotationPage: React.FC = () => {
             imagePath={currentImage.url}
             annotations={annotations}
             aiPrediction={aiResult ?? { label: '—', confidence: 0 }}
+            manualLabel={manualLabel}
+            setManualLabel={setManualLabel}
+            stage={stage}
+            setStage={setStage}
+            otherDisease={otherDisease}
+            setOtherDisease={setOtherDisease}
           />
         </div>
       </div>

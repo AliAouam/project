@@ -39,7 +39,7 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     if (images.length === 0) return;
     images.forEach(img => {
-      fetch(`${API}/api/annotations/${img.id}`)
+      fetch(`${API}/api/annotations/${img.id}?created_by=${encodeURIComponent(user!.email)}`)
         .then(res => res.json())
         .then((anns: any[]) => {
           setAnnotationCounts(prev => ({
