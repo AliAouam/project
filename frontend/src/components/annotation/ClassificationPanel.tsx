@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { exportJson } from "../../utils/exportJson";
 
 interface Annotation {
   id?: string;
@@ -57,15 +58,7 @@ const ClassificationPanel: React.FC<Props> = ({
       exported_at: new Date().toISOString(),
     };
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${patientId}_annotations_export.json`;
-    link.click();
-
-    URL.revokeObjectURL(url);
+    exportJson(exportData, `${patientId}_annotations_export.json`);
   };
 
   // Fonction pour sauvegarder en base via l'API FastAPI
