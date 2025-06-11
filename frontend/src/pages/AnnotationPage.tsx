@@ -132,6 +132,29 @@ const AnnotationPage: React.FC = () => {
     }
   }
 
+  // 8) Export JSON
+  const handleExportJSON = () => {
+    if (!currentImage || !user) return
+    const exportData = {
+      imageId: currentImage.id,
+      patientId: currentImage.patientId,
+      patientName: currentImage.patientName,
+      imagePath: currentImage.url,
+      doctor: user.email,
+      annotations,
+      exportedAt: new Date().toISOString(),
+    }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json',
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${currentImage.id}_annotations.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   // 8) Export PDF
   const handleExportPDF = async () => {
     if (!currentImage) return
@@ -177,6 +200,9 @@ const AnnotationPage: React.FC = () => {
           </Button>
           <Button variant="outline" onClick={handleExportPDF}>
             <FileText className="h-4 w-4 mr-1" /> Export PDF
+          </Button>
+          <Button variant="outline" onClick={handleExportJSON}>
+            <FileText className="h-4 w-4 mr-1" /> Export JSON
           </Button>
         </div>
       </div>
