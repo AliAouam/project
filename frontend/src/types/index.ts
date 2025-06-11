@@ -18,6 +18,7 @@ export type Annotation = {
   color: string
   createdAt: string
   created_by: string
+  other_diseases?: string
 }
 
 export type AIAnnotation = {

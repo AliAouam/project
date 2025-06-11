@@ -4,6 +4,7 @@ import { Annotation, AIAnnotation, User } from '../../types'
 import { v4 as uuidv4 } from 'uuid'
 import Button from '../ui/Button'
 import Select from '../ui/Select'
+import Input from '../ui/Input'
 
 const CANVAS_WIDTH = 800
 const CANVAS_HEIGHT = 600
@@ -34,6 +35,7 @@ const AnnotationCanvas: React.FC<Props> = ({
   const [tmp, setTmp] = useState<{ x: number; y: number; w: number; h: number } | null>(null)
   const [type, setType] = useState('hemorrhage')
   const [severity, setSeverity] = useState<'mild'|'moderate'|'severe'>('mild')
+  const [otherDiseases, setOtherDiseases] = useState('')
   const stageRef = useRef<any>(null)
 
   useEffect(() => {
@@ -73,6 +75,11 @@ const AnnotationCanvas: React.FC<Props> = ({
     const rx = w<0 ? x+w : x
     const ry = h<0 ? y+h : y
     const nw = Math.abs(w), nh = Math.abs(h)
+    if (type === 'no_dr' && !otherDiseases.trim()) {
+      alert('Please specify other diseases')
+      setTmp(null)
+      return
+    }
     const newA: Annotation = {
       id: uuidv4(),
       x: rx,
@@ -83,10 +90,12 @@ const AnnotationCanvas: React.FC<Props> = ({
       severity,
       color: colorFor(severity),
       createdAt: new Date().toISOString(),
-      created_by: user.email // << utiliser l'utilisateur connecté !
+      created_by: user.email, // << utiliser l'utilisateur connecté !
+      ...(type === 'no_dr' ? { other_diseases: otherDiseases } : {})
     }
     onAnnotationsChange([...annotations, newA])
     setTmp(null)
+    setOtherDiseases('')
   }
 
   return (
@@ -105,15 +114,27 @@ const AnnotationCanvas: React.FC<Props> = ({
               {value:'microaneurysm',label:'Microaneurysm'},
               {value:'exudate',label:'Exudate'},
               {value:'neovascularization',label:'Neovascularization'},
+              {value:'no_dr',label:'No DR'},
             ]}
           />
-          <Select label="Severity" value={severity} onChange={e=>setSeverity(e.target.value as any)} className="w-40"
-            options={[
-              {value:'mild',label:'Mild'},
-              {value:'moderate',label:'Moderate'},
-              {value:'severe',label:'Severe'},
-            ]}
-          />
+          {type !== 'no_dr' && (
+            <Select label="Severity" value={severity} onChange={e=>setSeverity(e.target.value as any)} className="w-40"
+              options={[
+                {value:'mild',label:'Mild'},
+                {value:'moderate',label:'Moderate'},
+                {value:'severe',label:'Severe'},
+              ]}
+            />
+          )}
+          {type === 'no_dr' && (
+            <Input
+              label="Other Diseases"
+              value={otherDiseases}
+              onChange={e => setOtherDiseases(e.target.value)}
+              required
+              className="w-40"
+            />
+          )}
         </div>
       </div>
       <div className="border rounded-lg overflow-hidden bg-gray-100">
