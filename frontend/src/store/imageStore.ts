@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { RetinalImage, Annotation, AIAnnotation, AIPrediction } from '../types'
+import { useAuthStore } from './authStore'
 
 interface ImageState {
   images: RetinalImage[]
@@ -58,6 +59,10 @@ export const useImageStore = create<ImageState>((set, get) => ({
       form.append('image', file)
       form.append('patientId', patientId)
       form.append('patientName', patientName)
+      const { user } = useAuthStore.getState()
+      if (user) {
+        form.append('uploadedBy', user.name)
+      }
       const res = await fetch(`${API_BASE}/api/images`, {
         method: 'POST',
         body: form,
@@ -69,7 +74,7 @@ export const useImageStore = create<ImageState>((set, get) => ({
         patientId: doc.patientId,
         patientName: doc.patientName,
         uploadedAt: doc.uploadedAt,
-        uploadedBy: doc.uploadedBy ?? '',
+        uploadedBy: doc.uploadedBy ?? user?.name ?? '',
         annotations: [],
         aiAnnotations: [],
         similarityScore: doc.similarityScore,
