@@ -44,7 +44,9 @@ const AnnotationPage: React.FC = () => {
     if (!currentImage || !user) return
     setLoadingAnn(true)
     // On récupère QUE les annotations créées par cet user pour cette image
-    fetch(`${API}/api/annotations/${currentImage.id}?created_by=${encodeURIComponent(user.email)}`)
+    fetch(`${API}/api/annotations/${currentImage.id}?created_by=${encodeURIComponent(user.email)}`, {
+      headers: { 'X-User-Role': user.role }
+    })
       .then(r => r.json())
       .then((data: Annotation[]) => setAnnotations(data))
       .catch(console.error)
@@ -69,7 +71,9 @@ const AnnotationPage: React.FC = () => {
   const handleReset = () => {
     if (!currentImage || !user) return
     setLoadingAnn(true)
-    fetch(`${API}/api/annotations/${currentImage.id}?created_by=${encodeURIComponent(user.email)}`)
+    fetch(`${API}/api/annotations/${currentImage.id}?created_by=${encodeURIComponent(user.email)}`, {
+      headers: { 'X-User-Role': user.role }
+    })
       .then(r => r.json())
       .then((data: Annotation[]) => setAnnotations(data))
       .catch(console.error)
@@ -82,7 +86,9 @@ const AnnotationPage: React.FC = () => {
     try {
       // fetch existing (for this user only!)
       const existing: Annotation[] = await fetch(
-        `${API}/api/annotations/${currentImage.id}?created_by=${encodeURIComponent(user.email)}`
+        `${API}/api/annotations/${currentImage.id}?created_by=${encodeURIComponent(user.email)}`, {
+          headers: { 'X-User-Role': user.role }
+        }
       ).then(r => r.json())
       // delete each
       await Promise.all(
