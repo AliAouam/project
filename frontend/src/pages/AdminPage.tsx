@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Users, Database, Settings, List as ListIcon } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
@@ -30,6 +30,7 @@ interface Image {
   patientName?: string
   patientId?: string
   uploadedAt: string
+  uploadedBy?: string
 }
 interface LogEntry {
   id: string
@@ -61,6 +62,26 @@ const AdminPage: React.FC = () => {
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [logsLoading, setLogsLoading] = useState(false)
 
+  // Map image id to doctor names (uploader + annotators)
+  const doctorNames = useMemo(() => {
+    const map: Record<string, string> = {}
+    images.forEach(img => {
+      const emails = new Set<string>()
+      if (img.uploadedBy) emails.add(img.uploadedBy)
+      annotations.forEach(a => {
+        if (a.imageId === img.id && a.created_by) {
+          emails.add(a.created_by)
+        }
+      })
+      const names = Array.from(emails).map(email => {
+        const u = users.find(us => us.email === email)
+        return u?.name || email
+      })
+      map[img.id] = names.join(', ')
+    })
+    return map
+  }, [images, annotations, users])
+
   // 🔥 Toast + polling states
   const [lastLogId, setLastLogId] = useState<string | null>(null)
   const [toastMsg, setToastMsg] = useState<string | null>(null)
@@ -71,7 +92,18 @@ const AdminPage: React.FC = () => {
     if (user?.role !== 'admin') return navigate('/dashboard')
 
     fetch(`${API}/api/users`).then(r => r.json()).then(setUsers)
-    fetch(`${API}/api/images`).then(r => r.json()).then(setImages)
+    fetch(`${API}/api/images`)
+      .then(r => r.json())
+      .then(data => {
+        const imgs = data.map((d: any) => ({
+          id: d.id,
+          patientName: d.patientName,
+          patientId: d.patientId,
+          uploadedAt: d.uploadedAt,
+          uploadedBy: d.uploadedBy ?? ''
+        }))
+        setImages(imgs)
+      })
     fetch(`${API}/api/annotations`)
       .then(async r => {
         let data
@@ -298,6 +330,7 @@ const AdminPage: React.FC = () => {
               <tr className="border-b">
                 <th className="py-2 text-left">Patient Name</th>
                 <th className="py-2 text-left">Patient ID</th>
+                <th className="py-2 text-left">Doctor</th>
                 <th className="py-2 text-left">Upload Date</th>
                 <th className="py-2 text-left">Actions</th>
               </tr>
@@ -307,6 +340,7 @@ const AdminPage: React.FC = () => {
                 <tr key={img.id} className="border-b hover:bg-gray-50">
                   <td className="py-1">{img.patientName || img.id}</td>
                   <td className="py-1">{img.patientId || '-'}</td>
+                  <td className="py-1">{doctorNames[img.id] || '—'}</td>
                   <td className="py-1">{new Date(img.uploadedAt).toLocaleDateString()}</td>
                   <td className="py-1">
                     <button className="text-red-600 hover:underline" onClick={() => handleDeleteImage(img.id)}>
