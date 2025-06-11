@@ -4,6 +4,7 @@ import { Annotation, AIAnnotation, User } from '../../types'
 import { v4 as uuidv4 } from 'uuid'
 import Button from '../ui/Button'
 import Select from '../ui/Select'
+import { exportJson } from '../../utils/exportJson'
 
 const CANVAS_WIDTH = 800
 const CANVAS_HEIGHT = 600
@@ -89,6 +90,11 @@ const AnnotationCanvas: React.FC<Props> = ({
     setTmp(null)
   }
 
+  const handleExport = () => {
+    const data = { imageUrl, annotations };
+    exportJson(data, 'annotations_export.json');
+  }
+
   return (
     <div className="flex flex-col">
       {/* contrôles zoom / type / sev */}
@@ -97,6 +103,7 @@ const AnnotationCanvas: React.FC<Props> = ({
           <Button size="sm" onClick={() => setZoom(z=>z*1.2)}>Zoom In</Button>
           <Button size="sm" onClick={() => setZoom(z=>z/1.2)}>Zoom Out</Button>
           <Button size="sm" variant="outline" onClick={() => setZoom(1)}>Reset</Button>
+          <Button size="sm" onClick={handleExport}>Export JSON</Button>
         </div>
         <div className="flex space-x-4">
           <Select label="Anomaly Type" value={type} onChange={e=>setType(e.target.value)} className="w-40"
