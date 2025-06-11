@@ -28,6 +28,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, annotationCount }) => {
           {image.patientName}
         </h3>
         <p className="text-gray-600">Patient ID: {image.patientId}</p>
+        <p className="text-gray-600">Uploaded by: {image.uploadedBy || '—'}</p>
 
         <div className="mt-4 flex justify-between items-center text-sm text-gray-500">
           <div className="flex items-center">

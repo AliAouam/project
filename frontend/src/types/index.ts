@@ -14,7 +14,7 @@ export type Annotation = {
   width: number
   height: number
   type: string
-  severity: 'mild' | 'moderate' | 'severe'
+  severity: string
   color: string
   createdAt: string
   created_by: string

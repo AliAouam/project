@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 interface Annotation {
   id?: string;
@@ -20,6 +20,12 @@ interface Props {
   imagePath: string;
   annotations: Annotation[];
   aiPrediction?: AIPrediction;
+  manualLabel: string;
+  setManualLabel: (v: string) => void;
+  stage: string;
+  setStage: (v: string) => void;
+  otherDisease: string;
+  setOtherDisease: (v: string) => void;
 }
 
 const diseaseLabels = [
@@ -37,36 +43,14 @@ const ClassificationPanel: React.FC<Props> = ({
   imagePath,
   annotations,
   aiPrediction,
+  manualLabel,
+  setManualLabel,
+  stage,
+  setStage,
+  otherDisease,
+  setOtherDisease,
 }) => {
-  const [manualLabel, setManualLabel] = useState<string>("");
 
-  // Fonction pour exporter en JSON (déjà présente)
-  const handleExport = () => {
-    const exportData = {
-      patientId,
-      patientName,
-      imagePath,
-      manual_label: manualLabel,
-      ai_prediction: aiPrediction,
-      annotations,
-      comparison: aiPrediction
-        ? aiPrediction.label === manualLabel
-          ? "Identique"
-          : "Différent"
-        : "En attente",
-      exported_at: new Date().toISOString(),
-    };
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${patientId}_annotations_export.json`;
-    link.click();
-
-    URL.revokeObjectURL(url);
-  };
 
   // Fonction pour sauvegarder en base via l'API FastAPI
   const handleSaveToDB = async () => {
@@ -75,6 +59,8 @@ const ClassificationPanel: React.FC<Props> = ({
       patientName,
       imagePath,
       manual_label: manualLabel,
+      stage: manualLabel === 'No DR' ? null : stage,
+      other_disease: manualLabel === 'No DR' ? otherDisease : null,
       ai_prediction: aiPrediction,
       annotations,
       comparison: aiPrediction
@@ -86,7 +72,7 @@ const ClassificationPanel: React.FC<Props> = ({
     };
 
     try {
-      const response = await fetch("http://localhost:8000/classifications", {
+      const response = await fetch("http://localhost:8000/api/classifications", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,19 +95,53 @@ const ClassificationPanel: React.FC<Props> = ({
     <div className="bg-white p-4 rounded shadow-md mt-4">
       <h3 className="text-lg font-semibold mb-2">Classification Globale</h3>
 
-      <label className="block mb-2 text-sm font-medium">Sélection manuelle :</label>
+      <label className="block mb-2 text-sm font-medium">Type d'anomalie :</label>
       <select
         className="border p-2 rounded w-full mb-4"
         value={manualLabel}
-        onChange={(e) => setManualLabel(e.target.value)}
+        onChange={(e) => {
+          setManualLabel(e.target.value)
+          setStage('')
+          setOtherDisease('')
+        }}
       >
-        <option value="">-- Choisir une maladie --</option>
+        <option value="">-- Choisir --</option>
+        <option value="No DR">No DR</option>
         {diseaseLabels.map((label) => (
           <option key={label} value={label}>
             {label}
           </option>
         ))}
       </select>
+
+      {manualLabel && manualLabel !== 'No DR' && (
+        <>
+          <label className="block mb-2 text-sm font-medium">Stade :</label>
+          <select
+            className="border p-2 rounded w-full mb-4"
+            value={stage}
+            onChange={(e) => setStage(e.target.value)}
+          >
+            <option value="">-- Choisir le stade --</option>
+            {[1,2,3,4].map(n => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
+        </>
+      )}
+
+      {manualLabel === 'No DR' && (
+        <>
+          <label className="block mb-2 text-sm font-medium">Autres maladies oculaires :</label>
+          <input
+            type="text"
+            className="border p-2 rounded w-full mb-4"
+            value={otherDisease}
+            onChange={(e) => setOtherDisease(e.target.value)}
+            placeholder="Précisez si besoin"
+          />
+        </>
+      )}
 
       {aiPrediction && (
         <div className="mb-4 p-2 bg-blue-50 rounded">
@@ -149,16 +169,9 @@ const ClassificationPanel: React.FC<Props> = ({
 
       <div className="flex gap-3">
         <button
-          onClick={handleExport}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          disabled={!manualLabel}
-        >
-          Exporter en JSON
-        </button>
-        <button
           onClick={handleSaveToDB}
           className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          disabled={!manualLabel}
+          disabled={!manualLabel || (manualLabel !== 'No DR' && !stage)}
         >
           Sauvegarder en DB
         </button>
