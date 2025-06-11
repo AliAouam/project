@@ -3,6 +3,7 @@ import { Annotation, AIAnnotation } from '../../types';
 import { useImageStore } from '../../store/imageStore';
 import Button from '../ui/Button';
 import Select from '../ui/Select';
+import Input from '../ui/Input';
 import { Trash2 } from 'lucide-react';
 
 interface AnnotationDetailsProps {
@@ -21,11 +22,13 @@ const AnnotationDetails: React.FC<AnnotationDetailsProps> = ({
   const [severity, setSeverity] = useState<'mild' | 'moderate' | 'severe'>(
     (annotation?.severity as 'mild' | 'moderate' | 'severe') || 'mild'
   );
+  const [otherDiseases, setOtherDiseases] = useState(annotation?.other_diseases || '');
 
   React.useEffect(() => {
     if (annotation) {
       setType(annotation.type);
       setSeverity(annotation.severity);
+      setOtherDiseases(annotation.other_diseases || '');
     }
   }, [annotation]);
 
@@ -52,6 +55,11 @@ const AnnotationDetails: React.FC<AnnotationDetailsProps> = ({
       severity: newSeverity,
       color
     });
+  };
+
+  const handleOtherDiseasesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOtherDiseases(e.target.value);
+    updateAnnotation(annotation.id, { other_diseases: e.target.value });
   };
 
   const handleDelete = () => {
@@ -101,19 +109,30 @@ const AnnotationDetails: React.FC<AnnotationDetailsProps> = ({
               { value: 'microaneurysm', label: 'Microaneurysm' },
               { value: 'exudate', label: 'Exudate' },
               { value: 'neovascularization', label: 'Neovascularization' },
+              { value: 'no_dr', label: 'No DR' },
             ]}
           />
-          
-          <Select
-            label="Severity"
-            value={severity}
-            onChange={handleSeverityChange}
-            options={[
-              { value: 'mild', label: 'Mild' },
-              { value: 'moderate', label: 'Moderate' },
-              { value: 'severe', label: 'Severe' },
-            ]}
-          />
+
+          {type !== 'no_dr' && (
+            <Select
+              label="Severity"
+              value={severity}
+              onChange={handleSeverityChange}
+              options={[
+                { value: 'mild', label: 'Mild' },
+                { value: 'moderate', label: 'Moderate' },
+                { value: 'severe', label: 'Severe' },
+              ]}
+            />
+          )}
+          {type === 'no_dr' && (
+            <Input
+              label="Other Diseases"
+              value={otherDiseases}
+              onChange={handleOtherDiseasesChange}
+              required
+            />
+          )}
         </div>
         
         <div className="mt-2">

@@ -97,6 +97,7 @@ class AnnotationIn(BaseModel):
     severity: str
     color: str
     created_by: Optional[str] = None
+    other_diseases: Optional[str] = None
 
 class AnnotationOut(AnnotationIn):
     id: str
