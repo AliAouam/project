@@ -14,7 +14,7 @@ export type Annotation = {
   width: number
   height: number
   type: string
-  severity: 'mild' | 'moderate' | 'severe'
+  stage: 'mild' | 'moderate' | 'severe'
   color: string
   createdAt: string
   created_by: string
@@ -27,7 +27,7 @@ export type AIAnnotation = {
   width: number
   height: number
   type: string
-  severity: 'mild' | 'moderate' | 'severe'
+  stage: 'mild' | 'moderate' | 'severe'
   confidence: number
   color: string
 }

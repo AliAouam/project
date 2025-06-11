@@ -3,7 +3,7 @@ import React, { useState } from "react";
 interface Annotation {
   id?: string;
   type?: string;
-  severity?: string;
+  stage?: string;
   position?: { x: number; y: number };
   size?: { width: number; height: number };
   created?: string;

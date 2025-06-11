@@ -94,7 +94,7 @@ class AnnotationIn(BaseModel):
     width: float
     height: float
     type: str
-    severity: str
+    stage: str
     color: str
     created_by: Optional[str] = None
 
@@ -376,7 +376,7 @@ async def export_annotations_pdf(image_id: str):
         for a in anns:
             user = a.get("created_by", "-")
             date_str = a["createdAt"].strftime("%Y-%m-%d %H:%M") if isinstance(a["createdAt"], datetime) else str(a["createdAt"])
-            pdf.cell(0, 8, f'- {a["type"].capitalize()} | Severity: {a["severity"]} | User: {user} | Date: {date_str}', ln=1)
+            pdf.cell(0, 8, f'- {a["type"].capitalize()} | Stage: {a["stage"]} | User: {user} | Date: {date_str}', ln=1)
     else:
         pdf.cell(0, 8, "Aucune annotation.", ln=1)
 
