@@ -3,7 +3,7 @@ import io
 from datetime import datetime
 from typing import List, Optional
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Path, status, Query
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Path, status, Query, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm
@@ -96,7 +96,7 @@ class AnnotationIn(BaseModel):
     type: str
     severity: str
     color: str
-    created_by: Optional[str] = None
+    created_by: str
 
 class AnnotationOut(AnnotationIn):
     id: str
@@ -275,8 +275,11 @@ async def get_all_annotations():
 @app.get("/api/annotations/{imageId}", response_model=List[AnnotationOut])
 async def get_annotations(
     imageId: str = Path(..., description="Image ID"),
-    created_by: Optional[str] = Query(None)
+    created_by: Optional[str] = Query(None),
+    x_user_role: Optional[str] = Header(None)
 ):
+    if not created_by and x_user_role != "admin":
+        raise HTTPException(400, "created_by query parameter required")
     query = {"imageId": imageId}
     if created_by:
         query["created_by"] = created_by
@@ -285,6 +288,8 @@ async def get_annotations(
 
 @app.post("/api/annotations", response_model=AnnotationOut)
 async def create_annotation(ann: AnnotationIn):
+    if not ann.created_by:
+        raise HTTPException(400, "created_by is required")
     d = ann.dict()
     d["createdAt"] = datetime.utcnow()
     res = await db.annotations.insert_one(d)
