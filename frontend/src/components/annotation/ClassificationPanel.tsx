@@ -3,7 +3,7 @@ import React, { useState } from "react";
 interface Annotation {
   id?: string;
   type?: string;
-  severity?: string;
+  stage?: string;
   position?: { x: number; y: number };
   size?: { width: number; height: number };
   created?: string;
@@ -17,7 +17,9 @@ interface AIPrediction {
 interface Props {
   patientId: string;
   patientName: string;
+  imageId: string;
   imagePath: string;
+  email: string;
   annotations: Annotation[];
   aiPrediction?: AIPrediction;
 }
@@ -34,7 +36,9 @@ const diseaseLabels = [
 const ClassificationPanel: React.FC<Props> = ({
   patientId,
   patientName,
+  imageId,
   imagePath,
+  email,
   annotations,
   aiPrediction,
 }) => {
@@ -45,6 +49,8 @@ const ClassificationPanel: React.FC<Props> = ({
     const exportData = {
       patientId,
       patientName,
+      imageId,
+      email,
       imagePath,
       manual_label: manualLabel,
       ai_prediction: aiPrediction,
@@ -73,6 +79,8 @@ const ClassificationPanel: React.FC<Props> = ({
     const exportData = {
       patientId,
       patientName,
+      imageId,
+      email,
       imagePath,
       manual_label: manualLabel,
       ai_prediction: aiPrediction,

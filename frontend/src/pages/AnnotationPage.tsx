@@ -222,7 +222,9 @@ const AnnotationPage: React.FC = () => {
           <ClassificationPanel
             patientId={currentImage.patientId}
             patientName={currentImage.patientName}
+            imageId={currentImage.id}
             imagePath={currentImage.url}
+            email={user!.email}
             annotations={annotations}
             aiPrediction={aiResult ?? { label: '—', confidence: 0 }}
           />
