@@ -16,7 +16,8 @@ const AnnotationDetails: React.FC<AnnotationDetailsProps> = ({
   aiAnnotations,
   showAI,
 }) => {
-  const { updateAnnotation, deleteAnnotation } = useImageStore();
+  const updateAnnotation = useImageStore(s => s.updateAnnotation);
+  const deleteAnnotation = useImageStore(s => s.deleteAnnotation);
   const [type, setType] = useState(annotation?.type || '');
   const [severity, setSeverity] = useState<'mild' | 'moderate' | 'severe'>(
     (annotation?.severity as 'mild' | 'moderate' | 'severe') || 'mild'

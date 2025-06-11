@@ -15,6 +15,12 @@ interface ImageState {
   /** REPLACES the entire annotation array on the current image */
   updateCurrentAnnotations: (anns: Annotation[]) => void
 
+  /** update a single annotation on the current image */
+  updateAnnotation: (id: string, updates: Partial<Annotation>) => void
+
+  /** delete a single annotation from the current image */
+  deleteAnnotation: (id: string) => void
+
   /** generate and store a global AI prediction */
   generateAIPrediction: () => Promise<void>
 }
@@ -95,6 +101,30 @@ export const useImageStore = create<ImageState>((set, get) => ({
     const cur = get().currentImage
     if (!cur) return
     const updated: RetinalImage = { ...cur, annotations: anns }
+    set(state => ({
+      currentImage: updated,
+      images: state.images.map(i => (i.id === updated.id ? updated : i)),
+    }))
+  },
+
+  updateAnnotation: (id, updates) => {
+    const cur = get().currentImage
+    if (!cur) return
+    const updatedList = cur.annotations.map(a =>
+      a.id === id ? { ...a, ...updates } : a
+    )
+    const updated: RetinalImage = { ...cur, annotations: updatedList }
+    set(state => ({
+      currentImage: updated,
+      images: state.images.map(i => (i.id === updated.id ? updated : i)),
+    }))
+  },
+
+  deleteAnnotation: id => {
+    const cur = get().currentImage
+    if (!cur) return
+    const updatedList = cur.annotations.filter(a => a.id !== id)
+    const updated: RetinalImage = { ...cur, annotations: updatedList }
     set(state => ({
       currentImage: updated,
       images: state.images.map(i => (i.id === updated.id ? updated : i)),
