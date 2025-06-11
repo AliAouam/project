@@ -94,9 +94,27 @@ class AnnotationIn(BaseModel):
     width: float
     height: float
     type: str
+    stage: Optional[str] = None
     severity: str
     color: str
+    other_diseases: Optional[str] = None
     created_by: Optional[str] = None
+
+    @validator('stage', always=True)
+    def validate_stage_and_other(cls, v, values):
+        ann_type = values.get('type')
+        other = values.get('other_diseases')
+        if ann_type == 'no_dr':
+            if not other:
+                raise ValueError("other_diseases must be provided when type is 'no_dr'")
+            if v is not None:
+                raise ValueError("stage must not be provided when type is 'no_dr'")
+        else:
+            if v is None:
+                raise ValueError("stage is required when type is not 'no_dr'")
+            if other is not None:
+                raise ValueError("other_diseases must be None when type is not 'no_dr'")
+        return v
 
 class AnnotationOut(AnnotationIn):
     id: str
