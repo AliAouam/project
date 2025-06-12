@@ -3,6 +3,9 @@
     "lucide-react": "^0.511.0",
     "recharts": "^2.15.3"
   },
+  "scripts": {
+    "lint": "npm --prefix frontend run lint"
+  },
   "devDependencies": {
     "@types/recharts": "^2.0.1"
   }
