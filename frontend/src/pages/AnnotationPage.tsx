@@ -253,10 +253,6 @@ const AnnotationPage: React.FC = () => {
             showAI={!!aiResult}
           />
           <ClassificationPanel
-            patientId={currentImage.patientId}
-            patientName={currentImage.patientName}
-            imagePath={currentImage.url}
-            annotations={annotations}
             aiPrediction={aiResult ?? { label: '—', confidence: 0 }}
             manualLabel={manualLabel}
             setManualLabel={setManualLabel}

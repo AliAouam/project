@@ -1,24 +1,11 @@
 import React from "react";
 
-interface Annotation {
-  id?: string;
-  type?: string;
-  severity?: string;
-  position?: { x: number; y: number };
-  size?: { width: number; height: number };
-  created?: string;
-}
-
 interface AIPrediction {
   label: string;
   confidence: number;
 }
 
 interface Props {
-  patientId: string;
-  patientName: string;
-  imagePath: string;
-  annotations: Annotation[];
   aiPrediction?: AIPrediction;
   manualLabel: string;
   setManualLabel: (v: string) => void;
@@ -38,10 +25,6 @@ const diseaseLabels = [
 ];
 
 const ClassificationPanel: React.FC<Props> = ({
-  patientId,
-  patientName,
-  imagePath,
-  annotations,
   aiPrediction,
   manualLabel,
   setManualLabel,
@@ -51,45 +34,6 @@ const ClassificationPanel: React.FC<Props> = ({
   setOtherDisease,
 }) => {
 
-
-  // Fonction pour sauvegarder en base via l'API FastAPI
-  const handleSaveToDB = async () => {
-    const exportData = {
-      patientId,
-      patientName,
-      imagePath,
-      manual_label: manualLabel,
-      stage: manualLabel === 'No DR' ? null : stage,
-      other_disease: manualLabel === 'No DR' ? otherDisease : null,
-      ai_prediction: aiPrediction,
-      annotations,
-      comparison: aiPrediction
-        ? aiPrediction.label === manualLabel
-          ? "Identique"
-          : "Différent"
-        : "En attente",
-      exported_at: new Date().toISOString(),
-    };
-
-    try {
-      const response = await fetch("http://localhost:8000/api/classifications", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(exportData),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        alert("Classification sauvegardée avec succès !");
-      } else {
-        alert("Erreur lors de la sauvegarde : " + data.detail);
-      }
-    } catch (error: any) {
-      alert("Erreur réseau lors de la sauvegarde.");
-      console.error(error);
-    }
-  };
 
   return (
     <div className="bg-white p-4 rounded shadow-md mt-4">
@@ -167,15 +111,6 @@ const ClassificationPanel: React.FC<Props> = ({
         </div>
       )}
 
-      <div className="flex gap-3">
-        <button
-          onClick={handleSaveToDB}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          disabled={!manualLabel || (manualLabel !== 'No DR' && !stage)}
-        >
-          Sauvegarder en DB
-        </button>
-      </div>
     </div>
   );
 };
