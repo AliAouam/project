@@ -31,7 +31,10 @@ export const useImageStore = create<ImageState>((set, get) => ({
     set({ isLoading: true })
     try {
       const user = useAuthStore.getState().user
-      const query = user ? `?uploaded_by=${encodeURIComponent(user.email)}` : ''
+      const query =
+        user && user.role === 'doctor'
+          ? `?uploaded_by=${encodeURIComponent(user.email)}`
+          : ''
       const res = await fetch(`${API_BASE}/api/images${query}`)
       const data: any[] = await res.json()
       const images = data.map(doc => ({
