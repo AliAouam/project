@@ -24,11 +24,17 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, annotationCount }) => {
       />
 
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900">
-          {image.patientName}
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">
+            {image.patientName}
+          </h3>
+          {image.uploadedBy && (
+            <span className="bg-gray-200 text-xs px-2 py-0.5 rounded">
+              Dr. {image.uploadedBy}
+            </span>
+          )}
+        </div>
         <p className="text-gray-600">Patient ID: {image.patientId}</p>
-        <p className="text-gray-600">Uploaded by: {image.uploadedBy || '—'}</p>
 
         <div className="mt-4 flex justify-between items-center text-sm text-gray-500">
           <div className="flex items-center">
