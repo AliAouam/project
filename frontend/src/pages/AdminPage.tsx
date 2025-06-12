@@ -212,6 +212,11 @@ const AdminPage: React.FC = () => {
     setImages(images => images.filter(i => i.id !== id))
   }
 
+  // Export activity logs as Excel
+  const handleExportLogsExcel = () => {
+    window.open(`${API}/api/export/excel`, '_blank')
+  }
+
   return (
     <Layout>
       <div className="mb-8">
@@ -328,7 +333,20 @@ const AdminPage: React.FC = () => {
         <div className="bg-white p-6 rounded-xl shadow border mb-8 max-h-[520px] overflow-y-auto">
           <div className="flex justify-between items-center mb-2">
             <h2 className="font-semibold text-lg">Activity Logs (latest 100)</h2>
-            <button className="text-sm text-blue-600 hover:underline" onClick={() => setShowLogs(false)}>Close</button>
+            <div className="space-x-2">
+              <button
+                className="text-sm text-blue-600 hover:underline"
+                onClick={handleExportLogsExcel}
+              >
+                Download Excel
+              </button>
+              <button
+                className="text-sm text-blue-600 hover:underline"
+                onClick={() => setShowLogs(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
           {logsLoading ? (
             <div className="py-8 text-center text-gray-500">Loading logs…</div>
