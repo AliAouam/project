@@ -20,6 +20,9 @@ from torchvision import transforms
 from bson import ObjectId
 
 from fpdf import FPDF
+from openpyxl import Workbook
+from tempfile import NamedTemporaryFile
+import json
 
 # ------------------------
 # FastAPI + CORS
@@ -392,6 +395,40 @@ async def export_annotations_pdf(image_id: str):
     pdf.output(out_path)
     await add_log("export", "pdf", image_id)
     return FileResponse(out_path, media_type="application/pdf", filename=f"annotation_report_{image_id}.pdf")
+
+# ------------------------
+# Export Excel endpoint
+# ------------------------
+@app.get("/api/export/excel")
+async def export_logs_excel():
+    logs = await db.logs.find().sort("created_at", -1).to_list(1000)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Logs"
+    ws.append(["Action", "Entity", "Entity ID", "User", "Details", "Created At"])
+
+    for l in logs:
+        created = l["created_at"].strftime("%Y-%m-%d %H:%M:%S") if isinstance(l["created_at"], datetime) else str(l["created_at"])
+        ws.append([
+            l.get("action"),
+            l.get("entity"),
+            l.get("entity_id"),
+            l.get("user"),
+            json.dumps(l.get("details", {})),
+            created
+        ])
+
+    with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+        wb.save(tmp.name)
+        out_path = tmp.name
+
+    await add_log("export", "excel", "logs")
+    return FileResponse(
+        out_path,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename="logs.xlsx",
+    )
 
 # ------------------------
 # Run
