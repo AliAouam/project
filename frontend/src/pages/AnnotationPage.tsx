@@ -13,6 +13,7 @@ import AnnotationDetails from '../components/annotation/AnnotationDetails'
 import ClassificationPanel from '../components/annotation/ClassificationPanel'
 import Button from '../components/ui/Button'
 import { Annotation, AIPrediction } from '../types'
+import * as XLSX from 'xlsx'
 
 const API = 'http://localhost:8000'
 
@@ -169,6 +170,21 @@ const AnnotationPage: React.FC = () => {
     window.open(`${API}/api/export/pdf/${currentImage.id}`, '_blank')
   }
 
+  // 9) Export Excel
+  const handleExportExcel = () => {
+    if (!currentImage || !user) return
+    const rows = annotations.map(a => ({
+      'Image name': currentImage.url.split('/').pop() ?? currentImage.id,
+      Classification: manualLabel,
+      'Doctor name': user.name,
+      'Annotation date': new Date(a.createdAt).toLocaleDateString(),
+    }))
+    const ws = XLSX.utils.json_to_sheet(rows)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Annotations')
+    XLSX.writeFile(wb, `${currentImage.patientId}_annotations.xlsx`)
+  }
+
   if (imgLoading || !currentImage || loadingAnn) {
     return (
       <Layout>
@@ -209,6 +225,9 @@ const AnnotationPage: React.FC = () => {
           <Button variant="outline" onClick={handleExportPDF}>
             <FileText className="h-4 w-4 mr-1" /> Export PDF
           </Button>
+          <Button variant="outline" onClick={handleExportExcel}>
+            <FileText className="h-4 w-4 mr-1" /> Export Excel
+          </Button>
         </div>
       </div>
       {/* Main Content */}
@@ -223,6 +242,7 @@ const AnnotationPage: React.FC = () => {
             onAnnotationsChange={handleDrawChange}
             user={user!}
             onExportJSON={handleExportJSON}
+            onExportExcel={handleExportExcel}
             exportDisabled={!manualLabel || (manualLabel !== 'No DR' && stage === '')}
           />
         </div>
